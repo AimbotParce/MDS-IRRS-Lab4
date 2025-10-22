@@ -1,0 +1,16 @@
+stages:
+  Download Raw Dataset:
+    cmd: python -m elastic.data.download_file 
+      https://www.cs.upc.edu/~marias/arxiv_abs.zip ./data/raw/arxiv-dataset.zip
+    deps:
+    - .\elastic\data\download_file.py
+    outs:
+    - .\data\raw\arxiv-dataset.zip
+  Unzip Raw Dataset:
+    cmd: python -m elastic.data.unzip ./data/raw/arxiv-dataset.zip 
+      ./data/processed/arxiv/
+    deps:
+    - .\data\raw\arxiv-dataset.zip
+    - .\elastic\data\unzip.py
+    outs:
+    - .\data\processed\arxiv\

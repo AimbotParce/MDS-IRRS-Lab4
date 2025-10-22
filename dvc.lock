@@ -1,0 +1,33 @@
+schema: '2.0'
+stages:
+  Download Raw Dataset:
+    cmd: python -m elastic.data.download_file 
+      https://www.cs.upc.edu/~marias/arxiv_abs.zip ./data/raw/arxiv-dataset.zip
+    deps:
+    - path: .\elastic\data\download_file.py
+      hash: md5
+      md5: ddcad957db9ae4233b23afd1a86f114d
+      size: 849
+    outs:
+    - path: .\data\raw\arxiv-dataset.zip
+      hash: md5
+      md5: ba903b8a742454256e4f7ade285f5f75
+      size: 61776017
+  Unzip Raw Dataset:
+    cmd: python -m elastic.data.unzip ./data/raw/arxiv-dataset.zip 
+      ./data/processed/arxiv/
+    deps:
+    - path: .\data\raw\arxiv-dataset.zip
+      hash: md5
+      md5: ba903b8a742454256e4f7ade285f5f75
+      size: 61776017
+    - path: .\elastic\data\unzip.py
+      hash: md5
+      md5: bcfebb27da97ca6db9724f4c44971da4
+      size: 1385
+    outs:
+    - path: .\data\processed\arxiv\
+      hash: md5
+      md5: 49ca987ab907b8f238502c6e89d683aa.dir
+      size: 103583180
+      nfiles: 58102
