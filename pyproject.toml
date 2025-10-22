@@ -9,5 +9,6 @@ dependencies = [
     "elasticsearch>=8.19.1",
     "elasticsearch-dsl>=8.18.0",
     "ipykernel>=6.30.1",
+    "numpy>=2.3.4",
     "requests>=2.32.5",
 ]
