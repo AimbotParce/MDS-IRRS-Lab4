@@ -57,3 +57,9 @@ To index the documents into Elasticsearch, run the following command:
 ```bash
 python -m elastic.indexer --path ./data/processed/arxiv --index arxiv [--token {standard,whitespace,classic,letter}] [--filter ...]
 ```
+
+Finally, check that there should be around 58K documents in the index by either
+exploring the index in the Kibana interface at `http://localhost:5601` or by querying Elasticsearch directly:
+```bash
+curl -X GET "localhost:9200/arxiv/_count" -H 'Content-Type: application/json' -d'{"query":{"match_all":{}}}' | jq
+```
