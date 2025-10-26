@@ -730,6 +730,11 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/e3/87/f3f34b99c1590492f0050c51b5eedc15be8a9c4cb7ca4f21a71f8533a4fd/elasticsearch-8.19.1-py3-none-any.whl", hash = "sha256:b511dd4cc26aef1fc02c1b5c1eefe9f16d76127d8f133b0f6900fd052c48d2a4", size = 940480, upload-time = "2025-09-12T12:00:29.377Z" },
 ]
 
+[package.optional-dependencies]
+async = [
+    { name = "aiohttp" },
+]
+
 [[package]]
 name = "elasticsearch-dsl"
 version = "8.18.0"
@@ -1127,7 +1132,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "dvc" },
-    { name = "elasticsearch" },
+    { name = "elasticsearch", extra = ["async"] },
     { name = "elasticsearch-dsl" },
     { name = "ipykernel" },
     { name = "numpy" },
@@ -1137,7 +1142,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "dvc", specifier = ">=3.63.0" },
-    { name = "elasticsearch", specifier = ">=8.19.1" },
+    { name = "elasticsearch", extras = ["async"], specifier = ">=8.19.1" },
     { name = "elasticsearch-dsl", specifier = ">=8.18.0" },
     { name = "ipykernel", specifier = ">=6.30.1" },
     { name = "numpy", specifier = ">=2.3.4" },

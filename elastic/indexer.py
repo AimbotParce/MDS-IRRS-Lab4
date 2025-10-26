@@ -1,21 +1,20 @@
 import argparse
+import logging
 import os
 import re
-import logging
+
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import bulk
 from elasticsearch.exceptions import NotFoundError
+from elasticsearch.helpers import bulk
 from elasticsearch_dsl import Index
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
+
 def generate_files_list(path):
     """Generates a list of all files in a directory tree."""
-    return [
-        os.path.join(root, f)
-        for root, _, files in os.walk(path)
-        for f in files if "DS_Store" not in f
-    ]
+    return [os.path.join(root, f) for root, _, files in os.walk(path) for f in files if "DS_Store" not in f]
+
 
 def read_file(filepath):
     """Read file content with fallback encodings."""
@@ -26,19 +25,12 @@ def read_file(filepath):
         with open(filepath, "r", encoding="iso-8859-1") as f:
             return re.sub(r"\s+", " ", f.read()).strip()
 
+
 def main(args):
     client = Elasticsearch(args.host, request_timeout=1000)
 
     # Define index settings with custom analyzer
-    analysis = {
-        "analyzer": {
-            "default": {
-                "type": "custom",
-                "tokenizer": args.token,
-                "filter": args.filter
-            }
-        }
-    }
+    analysis = {"analyzer": {"custom": {"type": "custom", "tokenizer": args.token, "filter": args.filter}}}
 
     ind = Index(args.index, using=client)
 
@@ -56,18 +48,20 @@ def main(args):
     ind.settings(number_of_shards=1, analysis=analysis)
     ind.create()
 
+    mapping_properties = {
+        "path": {"type": "keyword"},
+        "text": {"type": "text", "analyzer": "custom"},
+    }
+
     # Ensure path is not tokenized
-    client.indices.put_mapping(
-        index=args.index,
-        properties={"path": {"type": "keyword"}}
-    )
+    client.indices.put_mapping(index=args.index, properties=mapping_properties)
 
     # Prepare documents
     lfiles = generate_files_list(args.path)
     logging.info("Indexing %d files", len(lfiles))
 
     lcommands = [
-        {"_op_type": "index", "_index": args.index, "_id": i+1, "path": f, "text": read_file(f)}
+        {"_op_type": "index", "_index": args.index, "_id": i + 1, "path": f, "text": read_file(f)}
         for i, f in enumerate(lfiles)
     ]
 
@@ -76,16 +70,22 @@ def main(args):
     client.indices.refresh(index=args.index)
     logging.info("Indexing completed successfully.")
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", required=True, help="Path to files")
     parser.add_argument("--index", required=True, help="Index name")
-    parser.add_argument("--token", default="standard",
-                        choices=["standard", "whitespace", "classic", "letter"],
-                        help="Text tokenizer")
-    parser.add_argument("--filter", default=["lowercase"], nargs=argparse.REMAINDER,
-                        help="Text filters (lowercase, asciifolding, stop, porter_stem, kstem, snowball)")
+    parser.add_argument(
+        "--token", default="standard", choices=["standard", "whitespace", "classic", "letter"], help="Text tokenizer"
+    )
+    parser.add_argument(
+        "--filter",
+        default=["lowercase"],
+        nargs=argparse.REMAINDER,
+        help="Text filters (lowercase, asciifolding, stop, porter_stem, kstem, snowball)",
+    )
     parser.add_argument("--host", default="http://localhost:9200", help="Elasticsearch host")
     parser.add_argument("--force", action="store_true", help="Force overwrite of existing index")
     args = parser.parse_args()
+    main(args)
     main(args)
