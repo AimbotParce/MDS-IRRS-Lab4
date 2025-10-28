@@ -1,4 +1,5 @@
 import math
+from functools import cache
 from typing import Dict, List
 
 from elasticsearch import AsyncElasticsearch, Elasticsearch
@@ -25,6 +26,7 @@ class TFIDFVectorizer:
         preprocessed_terms = [token_info["token"] for token_info in response["tokens"]]
         return preprocessed_terms
 
+    @cache
     def doc_count(self) -> int:
         """Returns the number of documents in the index."""
         response = self.client.count(index=self.index_name)
